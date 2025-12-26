@@ -1,0 +1,18 @@
+[
+    {
+        "title": "Very easy to use",
+        "description": "The interface is user-friendly and onboarding was smooth.",
+        "date": "2023-02-15",
+        "reviewer": "Amit R.",
+        "rating": "5",
+        "source": "Capterra"
+    },
+    {
+        "title": "Good but needs improvements",
+        "description": "Reporting features could be better.",
+        "date": "2023-09-05",
+        "reviewer": "Neha P.",
+        "rating": "4",
+        "source": "Capterra"
+    }
+]

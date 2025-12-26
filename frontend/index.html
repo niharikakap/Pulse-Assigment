@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Reviews Dashboard</title>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f3f4f6;
+    color: #1f2937;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  select, input, button {
+    padding: 8px 12px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    outline: none;
+  }
+  button {
+    background-color: #3b82f6;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  button:hover {
+    background-color: #2563eb;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px 15px;
+    text-align: left;
+  }
+  th {
+    background-color: #3b82f6;
+    color: white;
+  }
+  tr:nth-child(even) {
+    background-color: #f9fafb;
+  }
+  tr:hover {
+    background-color: #e0f2fe;
+  }
+  .chart-container {
+    width: 400px;
+    margin: 0 auto;
+  }
+</style>
+</head>
+<body>
+
+<h1>Product Reviews Dashboard</h1>
+
+<div class="controls">
+  <input type="text" id="company" placeholder="Enter company name" />
+  <select id="source">
+    <option value="g2">G2</option>
+    <option value="capterra">Capterra</option>
+    <option value="trustradius">TrustRadius</option>
+  </select>
+  <button id="fetchBtn">Fetch Reviews</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Reviewer</th>
+      <th>Rating</th>
+      <th>Title</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="chart-container">
+  <canvas id="chart"></canvas>
+</div>
+
+<script>
+const fetchBtn = document.getElementById("fetchBtn");
+
+fetchBtn.addEventListener("click", () => {
+  const company = document.getElementById("company").value.trim();
+  const source = document.getElementById("source").value;
+
+  if (!company) {
+    alert("Please enter a company name.");
+    return;
+  }
+
+  fetch("http://127.0.0.1:5000/scrape", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ company, source })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const tableBody = document.querySelector("tbody");
+    tableBody.innerHTML = "";
+
+    let ratings = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+
+    data.forEach(item => {
+      const rating = Math.round(item.rating) || 0;
+      if (rating >= 1 && rating <= 5) ratings[rating]++;
+
+      const row = `
+        <tr>
+          <td>${item.product || ""}</td>
+          <td>${item.reviewer || ""}</td>
+          <td>${item.rating || ""} ⭐</td>
+          <td>${item.title || ""}</td>
+          <td>${item.description || ""}</td>
+        </tr>
+      `;
+      tableBody.innerHTML += row;
+    });
+
+    drawChart(ratings);
+  })
+  .catch(err => console.error(err));
+});
+
+let chartInstance = null;
+
+function drawChart(ratings) {
+  const ctx = document.getElementById("chart").getContext("2d");
+
+  const data = [
+    ratings[5] || 0,
+    ratings[4] || 0,
+    ratings[3] || 0,
+    ratings[2] || 0,
+    ratings[1] || 0
+  ];
+
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["5⭐", "4⭐", "3⭐", "2⭐", "1⭐"],
+      datasets: [{
+        data,
+        backgroundColor: ["#4ade80","#60a5fa","#facc15","#fb923c","#ef4444"]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" }
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>

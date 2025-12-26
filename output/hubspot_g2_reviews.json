@@ -1,0 +1,10 @@
+[
+    {
+        "title": "Excellent product",
+        "description": "This is a demo review for testing.",
+        "date": "2023-01-01",
+        "reviewer": "Demo User",
+        "rating": "5",
+        "source": "g2"
+    }
+]
